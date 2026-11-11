@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Student ID Card Generator | Chalapathi Institute of Technology</title>
+  <meta name="description" content="Generate, preview, customize, and print official Student ID cards for Chalapathi Institute of Technology (Autonomous). Supports single and bulk CSV batch processing.">
+  <meta name="theme-color" content="#0b4594">
+
+  <!-- Favicon & PWA Manifest -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Student ID Card Generator | Chalapathi Institute of Technology">
+  <meta property="og:description" content="Official Student ID Card Generator with live canvas preview, dynamic Code 128 barcode, passport photo positioning, CSV batch generation, and print-ready export.">
+  <meta property="og:image" content="assets/perfect_base_template.png">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter & Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Libraries: JsBarcode, jsPDF, PapaParse, JSZip, FileSaver -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <!-- Embedded Assets (Zero-CORS offline & file:// support) -->
+  <script src="assets_data.js?v=1.0.6"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css?v=1.0.6">
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col bg-slate-100">
+
+  <!-- TOP HEADER / BRANDING -->
+  <header class="no-print bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-950 text-white shadow-lg sticky top-0 z-40 border-b border-blue-800">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center space-x-2.5 sm:space-x-3">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white text-blue-900 flex items-center justify-center font-black text-lg sm:text-xl shadow-md shrink-0">
+          CIT
+        </div>
+        <div>
+          <h1 class="font-bold text-xs sm:text-base md:text-lg leading-tight tracking-wide">CHALAPATHI INSTITUTE OF TECHNOLOGY</h1>
+          <p class="text-[10px] sm:text-xs text-blue-200">Autonomous • NBA & NAAC 'A' Grade • Student ID Card Portal</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center space-x-1.5 sm:space-x-2.5 text-xs sm:text-sm">
+        <button id="btnFillSample" type="button" title="Fill official sample card details" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-blue-800/80 hover:bg-blue-700 text-blue-100 transition flex items-center gap-1.5 border border-blue-600/50 shadow-sm active:scale-95">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+          <span class="hidden sm:inline">Sample Data</span>
+          <span class="sm:hidden">Sample</span>
+        </button>
+        <button id="btnOpenBatch" type="button" title="Generate multiple ID cards from CSV" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white transition flex items-center gap-1.5 border border-indigo-500/50 shadow-sm active:scale-95">
+          <i class="fa-solid fa-file-csv"></i>
+          <span class="hidden sm:inline">Batch Mode</span>
+          <span class="sm:hidden">Batch</span>
+        </button>
+        <button id="btnPrintCard" type="button" title="Print physical ID card" class="px-3 sm:px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition flex items-center gap-1.5 sm:gap-2 shadow-md active:scale-95">
+          <i class="fa-solid fa-print"></i>
+          <span>Print</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN STUDIO LAYOUT -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8">
+    
+    <!-- MOBILE VIEW SWITCHER TABS (Visible only on Mobile & Tablet screens < lg) -->
+    <div class="no-print lg:hidden flex items-center justify-center mb-4 sticky top-14 z-30 pt-1 pb-1">
+      <div class="bg-white/95 backdrop-blur-md shadow-md border border-slate-200/90 p-1 rounded-2xl flex items-center w-full max-w-xs sm:max-w-sm">
+        <button
+          id="tabBtnForm"
+          type="button"
+          class="flex-1 py-2 sm:py-2.5 px-3 text-xs sm:text-sm font-bold rounded-xl transition shadow-sm bg-blue-900 text-white flex items-center justify-center gap-1.5"
+        >
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>Edit Form</span>
+        </button>
+        <button
+          id="tabBtnPreview"
+          type="button"
+          class="flex-1 py-2 sm:py-2.5 px-3 text-xs sm:text-sm font-bold rounded-xl transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5"
+        >
+          <i class="fa-solid fa-id-card"></i>
+          <span>Live Preview</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+      
+      <!-- LEFT COLUMN: FORM CONTROLS -->
+      <aside id="controlsPanel" class="no-print lg:col-span-6 space-y-5 sm:space-y-6">
+        
+        <!-- CARD 1: STUDENT DETAILS -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6">
+          <div class="flex items-center justify-between pb-3 sm:pb-4 mb-4 border-b border-slate-100">
+            <div class="flex items-center space-x-2.5">
+              <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center">
+                <i class="fa-solid fa-user-graduate"></i>
+              </span>
+              <h2 class="font-bold text-slate-800 text-base">Student Information</h2>
+            </div>
+            <button id="btnClearAll" type="button" class="text-xs text-rose-500 hover:text-rose-700 font-medium transition flex items-center gap-1">
+              <i class="fa-regular fa-trash-can"></i>
+              <span>Clear Form</span>
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Full Name -->
+            <div>
+              <label for="studentName" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                Student Full Name <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <i class="fa-solid fa-id-card"></i>
+                </span>
+                <input
+                  type="text"
+                  id="studentName"
+                  value="KODELA KIRAN KUMAR"
+                  placeholder="e.g. KODELA KIRAN KUMAR"
+                  class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase transition text-base sm:text-sm"
+                >
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">Printed prominently in bold above the signature line.</p>
+            </div>
+
+            <!-- Registration Number & Branch (2 columns) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="regNo" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                  Registration No. (Roll) <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-hashtag"></i>
+                  </span>
+                  <input
+                    type="text"
+                    id="regNo"
+                    value="23HT1A4353"
+                    placeholder="e.g. 23HT1A4353"
+                    class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase transition tracking-wider text-base sm:text-sm"
+                  >
+                </div>
+              </div>
+
+              <div>
+                <label for="branchSelect" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                  Branch / Program <span class="text-rose-500">*</span>
+                </label>
+                <select
+                  id="branchSelect"
+                  class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-base sm:text-sm"
+                >
+                  <option value="CSE-AI" selected>CSE-AI</option>
+                  <option value="CSE">CSE - Computer Science & Engg</option>
+                  <option value="CSE-AI&ML">CSE - AI & Machine Learning</option>
+                  <option value="CSE-DS">CSE - Data Science</option>
+                  <option value="ECE">ECE - Electronics & Comm</option>
+                  <option value="EEE">EEE - Electrical & Electronics</option>
+                  <option value="MECH">MECH - Mechanical Engg</option>
+                  <option value="CIVIL">CIVIL - Civil Engineering</option>
+                  <option value="IT">IT - Information Technology</option>
+                  <option value="MCA">MCA - Computer Applications</option>
+                  <option value="MBA">MBA - Business Administration</option>
+                  <option value="CUSTOM">Custom Branch Name...</option>
+                </select>
+                <input
+                  type="text"
+                  id="branchCustom"
+                  placeholder="Enter branch name..."
+                  class="hidden mt-2 w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-semibold uppercase focus:bg-white focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
+                >
+              </div>
+            </div>
+
+            <!-- Mobile No & Blood Group (2 columns) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="mobileNo" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                  Mobile Number <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-phone"></i>
+                  </span>
+                  <input
+                    type="tel"
+                    id="mobileNo"
+                    value="9908406687"
+                    placeholder="10-digit mobile"
+                    maxlength="10"
+                    class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-base sm:text-sm"
+                  >
+                </div>
+              </div>
+
+              <div>
+                <label for="bloodGroup" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                  Blood Group <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-rose-500">
+                    <i class="fa-solid fa-droplet"></i>
+                  </span>
+                  <select
+                    id="bloodGroup"
+                    class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-base sm:text-sm"
+                  >
+                    <option value="O+ve" selected>O +ve</option>
+                    <option value="A+ve">A +ve</option>
+                    <option value="B+ve">B +ve</option>
+                    <option value="AB+ve">AB +ve</option>
+                    <option value="O-ve">O -ve</option>
+                    <option value="A-ve">A -ve</option>
+                    <option value="B-ve">B -ve</option>
+                    <option value="AB-ve">AB -ve</option>
+                    <option value="NONE">None (Don't show)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Academic Batch / Years -->
+            <div>
+              <label for="batchSelect" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                Academic Batch / Duration
+              </label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <i class="fa-regular fa-calendar-days"></i>
+                </span>
+                <select
+                  id="batchSelect"
+                  class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-base sm:text-sm"
+                >
+                  <option value="2022 - 2026">2022 - 2026</option>
+                  <option value="2023 - 2027" selected>2023 - 2027</option>
+                  <option value="2024 - 2028">2024 - 2028</option>
+                  <option value="2025 - 2029">2025 - 2029</option>
+                  <option value="2026 - 2030">2026 - 2030</option>
+                  <option value="CUSTOM">Custom Batch...</option>
+                  <option value="NONE">None (Don't show)</option>
+                </select>
+              </div>
+              <input
+                type="text"
+                id="batchCustom"
+                placeholder="e.g. 2024 - 2028"
+                class="hidden mt-2 w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
+              >
+              <p class="text-[11px] text-slate-400 mt-1">Rendered vertically along the left edge of the ID card.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 2: STUDENT PHOTO UPLOAD & POSITIONING -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6">
+          <div class="flex items-center justify-between pb-3 sm:pb-4 mb-4 border-b border-slate-100">
+            <div class="flex items-center space-x-2.5">
+              <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                <i class="fa-solid fa-camera"></i>
+              </span>
+              <div>
+                <h2 class="font-bold text-slate-800 text-base">Student Photo</h2>
+                <p class="text-xs text-slate-400">Upload and adjust passport size photo</p>
+              </div>
+            </div>
+            <button id="btnLoadSamplePhoto" type="button" class="text-xs text-blue-600 hover:text-blue-800 font-medium transition">
+              Use Sample Photo
+            </button>
+          </div>
+
+          <!-- Drag and drop zone -->
+          <div id="photoDropZone" class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-4 text-center cursor-pointer transition bg-slate-50/60 hover:bg-blue-50/50">
+            <input type="file" id="photoUpload" accept="image/*" class="hidden">
+            <label for="photoUpload" class="cursor-pointer flex flex-col items-center">
+              <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
+              <span class="text-sm font-semibold text-slate-700">Click to upload or drag photo here</span>
+              <span class="text-xs text-slate-400 mt-0.5">JPG, PNG, or WEBP (Passport photo recommended)</span>
+            </label>
+          </div>
+
+          <!-- Photo Adjustments Sliders -->
+          <div class="mt-4 pt-4 border-t border-slate-100 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Photo Positioning</span>
+              <button id="btnResetPhoto" type="button" class="text-xs text-slate-500 hover:text-slate-800 underline">
+                Reset Position
+              </button>
+            </div>
+
+            <!-- Zoom -->
+            <div>
+              <div class="flex justify-between text-xs text-slate-500 mb-1">
+                <span><i class="fa-solid fa-magnifying-glass-plus mr-1"></i> Zoom Scale</span>
+                <span id="zoomValue" class="font-semibold text-slate-700">100%</span>
+              </div>
+              <input type="range" id="photoZoom" min="0.5" max="2.5" step="0.05" value="1.0" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer">
+            </div>
+
+            <!-- Pan X & Pan Y (2 cols) -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <span class="text-xs text-slate-500 block mb-1">Horizontal (Pan X)</span>
+                <input type="range" id="photoPanX" min="-150" max="150" step="2" value="0" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer">
+              </div>
+              <div>
+                <span class="text-xs text-slate-500 block mb-1">Vertical (Pan Y)</span>
+                <input type="range" id="photoPanY" min="-150" max="150" step="2" value="0" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer">
+              </div>
+            </div>
+
+            <p class="text-[11px] text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-info"></i>
+              <span><strong>Pro Tip:</strong> Click & drag directly on the photo inside the preview to reposition it!</span>
+            </p>
+
+            <div class="flex justify-end pt-1">
+              <button id="btnRemovePhoto" type="button" class="text-xs text-rose-500 hover:text-rose-700 font-medium">
+                Remove Photo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 3: BARCODE & TEMPLATE SETTINGS -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6">
+          <div class="flex items-center space-x-2.5 pb-3 mb-3 border-b border-slate-100">
+            <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
+              <i class="fa-solid fa-sliders"></i>
+            </span>
+            <h2 class="font-bold text-slate-800 text-base">Barcode & Template Settings</h2>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Dynamic Barcode Toggle -->
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-sm font-semibold text-slate-800 block">Dynamic Barcode (Code 128)</span>
+                <span class="text-xs text-slate-500">Auto-generates vertical barcode from Registration No.</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-3">
+                <input type="checkbox" id="barcodeToggle" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            <!-- Underlines Toggle (Default OFF) -->
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div>
+                <span class="text-sm font-semibold text-slate-800 block">Show Field Underlines</span>
+                <span class="text-xs text-slate-500">Turn on if you want underline lines under fields (Default: OFF)</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-3">
+                <input type="checkbox" id="underlineToggle" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            <!-- Custom Template Upload -->
+            <div class="pt-3 border-t border-slate-100">
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                Custom Background Template (Optional)
+              </label>
+              <input type="file" id="templateUpload" accept="image/*" class="text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer w-full">
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT COLUMN: LIVE PREVIEW & EXPORT STUDIO -->
+      <section id="previewSection" class="lg:col-span-6 flex flex-col items-center w-full">
+        <div class="lg:sticky lg:top-20 w-full flex flex-col items-center">
+          
+          <!-- MOBILE BACK TO FORM BUTTON (Visible only on mobile inside preview) -->
+          <div class="no-print lg:hidden w-full flex items-center justify-between mb-3">
+            <button
+              id="btnBackToForm"
+              type="button"
+              class="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Back to Form</span>
+            </button>
+            <span class="text-xs text-slate-400 font-mono">768 × 1024 px</span>
+          </div>
+
+          <!-- PREVIEW TOOLBAR -->
+          <div id="previewControls" class="no-print w-full flex items-center justify-between bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm mb-3">
+            <div class="flex items-center space-x-2">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Live Preview
+              </span>
+              <span class="text-xs text-slate-400 font-mono hidden sm:inline">768 × 1024 px</span>
+            </div>
+
+            <div class="flex items-center space-x-1.5 text-xs">
+              <button id="btnZoomFit" title="Fit to container" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95 transition">
+                <i class="fa-solid fa-compress"></i>
+                <span class="hidden sm:inline ml-1">Fit</span>
+              </button>
+              <button id="btnZoom100" title="Actual Size" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95 transition">
+                <i class="fa-solid fa-expand"></i>
+                <span class="hidden sm:inline ml-1">100%</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- THE ID CARD CANVAS CONTAINER -->
+          <div class="preview-wrapper w-full flex justify-center items-center py-1">
+            <div id="cardCanvasContainer" class="card-canvas-container max-w-[340px] xs:max-w-[380px] sm:max-w-[420px] transition-transform origin-top">
+              <canvas id="idCardCanvas" width="768" height="1024" title="Student ID Card - Click and drag photo to reposition"></canvas>
+            </div>
+          </div>
+
+          <!-- EXPORT & DOWNLOAD ACTIONS -->
+          <div class="no-print w-full max-w-[420px] mt-4 sm:mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+            <button
+              id="btnDownloadPNG"
+              type="button"
+              class="py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm sm:text-base active:scale-98"
+            >
+              <i class="fa-solid fa-download"></i>
+              <span>Download PNG</span>
+            </button>
+
+            <button
+              id="btnDownloadPDF"
+              type="button"
+              class="py-3 px-4 bg-blue-700 hover:bg-blue-600 text-white font-semibold rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm sm:text-base active:scale-98"
+            >
+              <i class="fa-solid fa-file-pdf"></i>
+              <span>Download PDF</span>
+            </button>
+          </div>
+
+          <!-- Direct Mobile Print Button -->
+          <button
+            id="btnPrintCardPreview"
+            type="button"
+            class="sm:hidden no-print w-full max-w-[420px] mt-2.5 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm active:scale-98"
+          >
+            <i class="fa-solid fa-print"></i>
+            <span>Print Physical ID Card</span>
+          </button>
+
+          <!-- Direct Print Reminder -->
+          <p class="no-print text-center text-xs text-slate-500 mt-3 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+            <span>Standard PVC CR80 Print Resolution (300 DPI equivalent)</span>
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- FLOATING MOBILE PREVIEW BUTTON (Visible on mobile when on Edit Form) -->
+  <div id="mobileFloatingBar" class="no-print lg:hidden fixed bottom-4 inset-x-4 z-30 flex justify-center">
+    <button
+      id="btnFloatingPreview"
+      type="button"
+      class="w-full max-w-sm py-3 px-5 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-bold rounded-2xl shadow-2xl flex items-center justify-between border border-blue-500/40 transition active:scale-95"
+    >
+      <span class="flex items-center gap-2 text-sm font-bold">
+        <i class="fa-solid fa-id-card text-lg"></i>
+        <span>View Live ID Card</span>
+      </span>
+      <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1">
+        <span>Preview</span>
+        <i class="fa-solid fa-arrow-right text-xs"></i>
+      </span>
+    </button>
+  </div>
+
+  <!-- BATCH GENERATION MODAL -->
+  <div id="batchModal" class="no-print hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-xl w-full p-4 sm:p-6 space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto my-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2.5">
+          <span class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-users"></i>
+          </span>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base sm:text-lg">Batch ID Card Generation</h3>
+            <p class="text-xs text-slate-500">Generate multiple ID cards at once from CSV</p>
+          </div>
+        </div>
+        <button id="btnCloseBatch" type="button" class="text-slate-400 hover:text-slate-700 text-lg p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Step 1: Download Sample CSV -->
+      <div class="bg-slate-50 rounded-xl p-3.5 sm:p-4 border border-slate-200/80">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span class="text-xs font-bold text-slate-700 uppercase">Step 1: Get CSV Template</span>
+            <p class="text-xs text-slate-500 mt-0.5">Columns: Name, RegNo, Branch, Mobile, BloodGroup, Batch</p>
+          </div>
+          <button id="btnDownloadSampleCSV" type="button" class="px-3.5 py-2 rounded-lg bg-white border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition shadow-sm flex items-center justify-center gap-1.5 shrink-0 active:scale-95">
+            <i class="fa-solid fa-download text-blue-600"></i>
+            <span>Download CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Upload Completed CSV -->
+      <div class="space-y-2">
+        <span class="text-xs font-bold text-slate-700 uppercase">Step 2: Upload Student CSV</span>
+        <input
+          type="file"
+          id="csvFileInput"
+          accept=".csv"
+          class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+        >
+      </div>
+
+      <!-- Record Navigator -->
+      <div class="bg-indigo-50/60 rounded-xl p-3 sm:p-4 border border-indigo-100 flex items-center justify-between">
+        <button id="btnPrevRecord" type="button" class="px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs font-bold text-indigo-700 hover:bg-indigo-100 shadow-sm active:scale-95">
+          <i class="fa-solid fa-chevron-left mr-1"></i> Prev
+        </button>
+        <span id="batchRecordCounter" class="text-xs font-bold text-indigo-900 text-center px-2">No CSV loaded</span>
+        <button id="btnNextRecord" type="button" class="px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs font-bold text-indigo-700 hover:bg-indigo-100 shadow-sm active:scale-95">
+          Next <i class="fa-solid fa-chevron-right ml-1"></i>
+        </button>
+      </div>
+
+      <!-- Export All Action -->
+      <div class="pt-2">
+        <button
+          id="btnExportAllZip"
+          type="button"
+          class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2 active:scale-98"
+        >
+          <i class="fa-solid fa-file-zipper text-lg"></i>
+          <span>Generate & Export All Cards as ZIP</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST NOTIFICATION -->
+  <div id="toastNotification" class="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs font-semibold transform translate-y-4 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2">
+    Notification
+  </div>
+
+  <!-- APPLICATION SCRIPT -->
+  <script src="app.js?v=1.0.6"></script>
+</body>
+</html>

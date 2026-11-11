@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "name": "cit-id-card-generator",
+  "cleanUrls": true,
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "headers": { "cache-control": "public, max-age=31536000, immutable" },
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/(.*)\\.(js|css)",
+      "headers": { "cache-control": "public, max-age=86400, stale-while-revalidate=604800" },
+      "dest": "/$1.$2"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}

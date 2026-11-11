@@ -1,0 +1,17 @@
+{
+  "name": "CIT Student ID Card Generator",
+  "short_name": "CIT ID Generator",
+  "description": "Official Student ID Card Generator for Chalapathi Institute of Technology",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0b4594",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "cit-id-card-generator",
+  "version": "1.0.0",
+  "description": "Student ID Card Generator Web Application with Live Preview and Print Engine",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve . -p 5500",
+    "serve": "npx serve .",
+    "dev": "python server.py",
+    "build": "echo 'Static web application ready for deployment.'"
+  },
+  "keywords": [
+    "id-card",
+    "id-card-generator",
+    "chalapathi-institute-of-technology",
+    "html5-canvas",
+    "jspdf",
+    "barcode-generator"
+  ],
+  "author": "Chalapathi Institute of Technology",
+  "license": "MIT"
+}

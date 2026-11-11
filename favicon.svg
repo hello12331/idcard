@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <rect width="128" height="128" rx="28" fill="#0b4594"/>
+  <rect x="18" y="24" width="92" height="64" rx="8" fill="#ffffff" opacity="0.95"/>
+  <circle cx="44" cy="50" r="14" fill="#0b4594"/>
+  <path d="M 28 76 C 28 66, 60 66, 60 76 Z" fill="#0b4594"/>
+  <rect x="66" y="40" width="34" height="6" rx="3" fill="#0b4594"/>
+  <rect x="66" y="52" width="26" height="5" rx="2.5" fill="#c9142e"/>
+  <rect x="66" y="63" width="30" height="5" rx="2.5" fill="#64748b"/>
+  <text x="64" y="112" font-family="'Montserrat', 'Arial Black', sans-serif" font-weight="900" font-size="22" fill="#ffffff" text-anchor="middle" letter-spacing="2">CIT</text>
+</svg>
