@@ -6,18 +6,18 @@
 // Active Config from Admin Studio (or default)
 let activeConfig = (typeof ConfigManager !== "undefined") ? ConfigManager.load() : (typeof DEFAULT_CONFIG !== "undefined" ? DEFAULT_CONFIG : null);
 
-// Application State
+// Application State (Always starts clear & blank for student entry)
 const state = {
-  name: "KODELA KIRAN KUMAR",
-  regNo: "23HT1A4353",
+  name: "",
+  regNo: "",
   branch: "CSE-AI",
-  mobile: "9908406687",
-  bloodGroup: "O+ve",
-  batch: "2023 - 2027",
-  showUnderlines: false, // Clean look matching target reference
-  customFieldsData: {}, // Additional custom dynamic fields
+  mobile: "",
+  bloodGroup: "NONE",
+  batch: "",
+  showUnderlines: false,
+  customFieldsData: {},
   
-  // Photo state
+  // Photo state (Null by default, waiting for student upload)
   photoImg: null,
   photoScale: 1.0,
   photoPanX: 0,
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindMobileTabs();
 });
 
-// Load Template & Sample Photo
+// Load Template (Card starts clean and empty until student uploads photo)
 function loadAssets() {
   const triggerRender = () => {
     requestAnimationFrame(() => renderCard());
@@ -141,16 +141,8 @@ function loadAssets() {
     state.templateImg.src = "assets/perfect_base_template.png";
   }
 
-  state.photoImg = new Image();
-  state.photoImg.onload = triggerRender;
-  state.photoImg.onerror = () => {
-    state.photoImg.src = "assets/sample_photo.jpg";
-  };
-  if (typeof EMBEDDED_ASSETS !== "undefined" && EMBEDDED_ASSETS.samplePhotoBase64) {
-    state.photoImg.src = EMBEDDED_ASSETS.samplePhotoBase64;
-  } else {
-    state.photoImg.src = "assets/sample_photo.jpg";
-  }
+  // Photo starts empty so the form is completely clear
+  state.photoImg = null;
 }
 
 function initDynamicAdminFeatures() {

@@ -177,7 +177,7 @@ function renderAdminCanvas() {
     if (!field.enabled) return;
 
     const c = field.canvas;
-    const textVal = `${c.prefix || ""}${field.defaultValue || field.label}${c.suffix || ""}`;
+    const textVal = `${c.prefix || ""}${field.defaultValue || field.placeholder || field.label}${c.suffix || ""}`;
 
     ctx.save();
 
