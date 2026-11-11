@@ -599,19 +599,19 @@ function renderCard() {
     ctx.drawImage(state.templateImg, 0, 0, canvas.width, canvas.height);
   }
 
-  // 2b. Dashed accreditation line
+  // 2b. Dashed accreditation line (Optional overlay if template doesn't have it)
   const dashedCfg = (activeConfig && activeConfig.template && activeConfig.template.dashedLine)
     ? activeConfig.template.dashedLine
-    : { enabled: true, y: 170.5, startX: 514, endX: 705, color: "#063c9e", width: 2.5, dash: [12, 5] };
+    : { enabled: false, y: 187, startX: 60, endX: 708, color: "#063c9e", width: 2.5, dash: [12, 5] };
 
-  if (dashedCfg.enabled !== false) {
+  if (dashedCfg.enabled === true) {
     ctx.save();
     ctx.strokeStyle = dashedCfg.color || "#063c9e";
     ctx.lineWidth = dashedCfg.width || 2.5;
     ctx.setLineDash(dashedCfg.dash || [12, 5]);
     ctx.beginPath();
-    ctx.moveTo(dashedCfg.startX !== undefined ? dashedCfg.startX : 514, dashedCfg.y || 170.5);
-    ctx.lineTo(dashedCfg.endX !== undefined ? dashedCfg.endX : 705, dashedCfg.y || 170.5);
+    ctx.moveTo(dashedCfg.startX !== undefined ? dashedCfg.startX : 60, dashedCfg.y || 187);
+    ctx.lineTo(dashedCfg.endX !== undefined ? dashedCfg.endX : 708, dashedCfg.y || 187);
     ctx.stroke();
     ctx.restore();
   }

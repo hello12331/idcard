@@ -52,12 +52,12 @@ const DEFAULT_CONFIG = {
       borderColor: "#0b4594"
     },
 
-    // Accreditation Dashed Divider Line (Full width continuous)
+    // Accreditation Dashed Divider Line (Disabled by default as new template already has continuous dashed line)
     dashedLine: {
-      enabled: true,
-      startX: 514,
-      endX: 705,
-      y: 170.5,
+      enabled: false,
+      startX: 60,
+      endX: 708,
+      y: 187,
       dashLength: 12,
       gapLength: 5,
       lineWidth: 2.5,
