@@ -32,7 +32,7 @@ const state = {
   templateImg: null,
 
   // Barcode & settings
-  useDynamicBarcode: false, // Default to authentic barcode from official reference
+  useDynamicBarcode: true, // Default to true: auto-prints barcode when student enters RegNo
   
   // Batch processing
   batchList: [],
@@ -723,17 +723,26 @@ function renderCard() {
     ctx.restore();
   }
 
-  // 7. Dynamic Barcode Layer (Only if enabled)
-  if (state.useDynamicBarcode && state.regNo) {
-    const bcCanvas = generateBarcodeOffscreen(state.regNo);
-    if (bcCanvas) {
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(520, 388, 126, 308);
+  // 7. Dynamic Barcode Layer (Auto-prints in background when student enters RegNo)
+  const isBarcodeActive = (activeConfig && activeConfig.template && activeConfig.template.barcode)
+    ? activeConfig.template.barcode.enabled !== false
+    : state.useDynamicBarcode;
 
+  if (isBarcodeActive && state.regNo && state.regNo.trim() !== "") {
+    const bcCfg = (activeConfig && activeConfig.template && activeConfig.template.barcode)
+      ? activeConfig.template.barcode
+      : { x: 640, y: 396, width: 290, height: 118, rotation: 90, clearBox: { x: 520, y: 388, width: 126, height: 308 } };
+
+    const bcCanvas = generateBarcodeOffscreen(state.regNo.trim());
+    if (bcCanvas) {
+      if (bcCfg.clearBox) {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(bcCfg.clearBox.x, bcCfg.clearBox.y, bcCfg.clearBox.width, bcCfg.clearBox.height);
+      }
       ctx.save();
-      ctx.translate(640, 396);
-      ctx.rotate(Math.PI / 2);
-      ctx.drawImage(bcCanvas, 0, 0, 290, 118);
+      ctx.translate(bcCfg.x, bcCfg.y);
+      ctx.rotate(((bcCfg.rotation !== undefined ? bcCfg.rotation : 90) * Math.PI) / 180);
+      ctx.drawImage(bcCanvas, 0, 0, bcCfg.width, bcCfg.height);
       ctx.restore();
     }
   }
