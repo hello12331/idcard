@@ -846,9 +846,12 @@ function renderCard() {
 
 // Bind Export Buttons: Print, PNG, PDF
 function bindExportButtons() {
-  document.getElementById("btnPrintCard").addEventListener("click", () => {
-    printIDCard();
-  });
+  const btnPrintCard = document.getElementById("btnPrintCard");
+  if (btnPrintCard) {
+    btnPrintCard.addEventListener("click", () => {
+      printIDCard();
+    });
+  }
 
   const btnPrintCardPreview = document.getElementById("btnPrintCardPreview");
   if (btnPrintCardPreview) {

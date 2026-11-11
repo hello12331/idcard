@@ -45,37 +45,11 @@
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col bg-slate-100">
 
-  <!-- TOP HEADER / BRANDING -->
-  <header class="no-print bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-950 text-white shadow-lg sticky top-0 z-40 border-b border-blue-800">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between gap-3">
-      <div class="flex items-center space-x-2.5 sm:space-x-3">
-        <div id="headerBadge" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white text-blue-900 flex items-center justify-center font-black text-lg sm:text-xl shadow-md shrink-0">
-          CIT
-        </div>
-        <div>
-          <h1 id="headerCollegeName" class="font-bold text-sm sm:text-base md:text-lg leading-tight tracking-wide">Student ID Card Portal</h1>
-        </div>
-      </div>
-
-      <!-- Quick Action Buttons -->
-      <div class="flex items-center space-x-2 text-xs sm:text-sm">
-        <a href="admin.html" class="px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 transition flex items-center gap-1.5 border border-slate-600/60 shadow-sm active:scale-95 text-xs sm:text-sm font-semibold">
-          <i class="fa-solid fa-sliders text-amber-400"></i>
-          <span>Admin Studio</span>
-        </a>
-        <button id="btnPrintCard" type="button" title="Print physical ID card" class="px-3.5 sm:px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition flex items-center gap-1.5 sm:gap-2 shadow-md active:scale-95">
-          <i class="fa-solid fa-print"></i>
-          <span>Print</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
   <!-- MAIN STUDIO LAYOUT -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8">
     
     <!-- MOBILE VIEW SWITCHER TABS (Visible only on Mobile & Tablet screens < lg) -->
-    <div class="no-print lg:hidden flex items-center justify-center mb-4 sticky top-14 z-30 pt-1 pb-1">
+    <div class="no-print lg:hidden flex items-center justify-center mb-4 sticky top-2 z-30 pt-1 pb-1">
       <div class="bg-white/95 backdrop-blur-md shadow-md border border-slate-200/90 p-1 rounded-2xl flex items-center w-full max-w-xs sm:max-w-sm">
         <button
           id="tabBtnForm"
@@ -355,35 +329,36 @@
           </div>
 
           <!-- EXPORT & DOWNLOAD ACTIONS -->
-          <div class="no-print w-full max-w-[420px] mt-4 sm:mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+          <div class="no-print w-full max-w-[420px] mt-4 sm:mt-5 space-y-2.5">
             <button
-              id="btnDownloadPNG"
+              id="btnPrintCard"
               type="button"
-              class="py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm sm:text-base active:scale-98"
+              class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm sm:text-base active:scale-98"
             >
-              <i class="fa-solid fa-download"></i>
-              <span>Download PNG</span>
+              <i class="fa-solid fa-print"></i>
+              <span>Print Physical ID Card</span>
             </button>
 
-            <button
-              id="btnDownloadPDF"
-              type="button"
-              class="py-3 px-4 bg-blue-700 hover:bg-blue-600 text-white font-semibold rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm sm:text-base active:scale-98"
-            >
-              <i class="fa-solid fa-file-pdf"></i>
-              <span>Download PDF</span>
-            </button>
+            <div class="grid grid-cols-2 gap-2.5">
+              <button
+                id="btnDownloadPNG"
+                type="button"
+                class="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition shadow-sm flex items-center justify-center gap-2 text-xs sm:text-sm active:scale-98"
+              >
+                <i class="fa-solid fa-download"></i>
+                <span>Download PNG</span>
+              </button>
+
+              <button
+                id="btnDownloadPDF"
+                type="button"
+                class="py-2.5 px-3 bg-blue-700 hover:bg-blue-600 text-white font-semibold rounded-xl transition shadow-sm flex items-center justify-center gap-2 text-xs sm:text-sm active:scale-98"
+              >
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Download PDF</span>
+              </button>
+            </div>
           </div>
-
-          <!-- Direct Mobile Print Button -->
-          <button
-            id="btnPrintCardPreview"
-            type="button"
-            class="sm:hidden no-print w-full max-w-[420px] mt-2.5 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm active:scale-98"
-          >
-            <i class="fa-solid fa-print"></i>
-            <span>Print Physical ID Card</span>
-          </button>
 
           <!-- Direct Print Reminder -->
           <p class="no-print text-center text-xs text-slate-500 mt-3 flex items-center justify-center gap-1.5">
@@ -395,6 +370,16 @@
 
     </div>
   </main>
+
+  <!-- FOOTER -->
+  <footer class="no-print py-6 text-center text-xs text-slate-400 flex items-center justify-center gap-4 border-t border-slate-200 mt-8">
+    <span>© CIT Student ID Portal</span>
+    <span>•</span>
+    <a href="admin.html" class="text-slate-500 hover:text-blue-600 font-medium transition flex items-center gap-1">
+      <i class="fa-solid fa-sliders text-[11px]"></i>
+      <span>Admin Studio</span>
+    </a>
+  </footer>
 
   <!-- FLOATING MOBILE PREVIEW BUTTON (Visible on mobile when on Edit Form) -->
   <div id="mobileFloatingBar" class="no-print lg:hidden fixed bottom-4 inset-x-4 z-30 flex justify-center">
