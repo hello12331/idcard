@@ -339,23 +339,35 @@
               <span>Print Physical ID Card</span>
             </button>
 
-            <div class="grid grid-cols-2 gap-2.5">
+            <div class="grid grid-cols-3 gap-2">
               <button
                 id="btnDownloadPNG"
                 type="button"
-                class="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition shadow-sm flex items-center justify-center gap-2 text-xs sm:text-sm active:scale-98"
+                title="Download lossless PNG format"
+                class="py-2.5 px-2.5 sm:px-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm active:scale-98"
               >
                 <i class="fa-solid fa-download"></i>
-                <span>Download PNG</span>
+                <span>PNG</span>
+              </button>
+
+              <button
+                id="btnDownloadJPG"
+                type="button"
+                title="Download high-resolution JPEG format"
+                class="py-2.5 px-2.5 sm:px-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm active:scale-98"
+              >
+                <i class="fa-solid fa-file-image"></i>
+                <span>JPG</span>
               </button>
 
               <button
                 id="btnDownloadPDF"
                 type="button"
-                class="py-2.5 px-3 bg-blue-700 hover:bg-blue-600 text-white font-semibold rounded-xl transition shadow-sm flex items-center justify-center gap-2 text-xs sm:text-sm active:scale-98"
+                title="Download print-ready PDF format"
+                class="py-2.5 px-2.5 sm:px-3 bg-blue-700 hover:bg-blue-600 text-white font-semibold rounded-xl transition shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm active:scale-98"
               >
                 <i class="fa-solid fa-file-pdf"></i>
-                <span>Download PDF</span>
+                <span>PDF</span>
               </button>
             </div>
           </div>

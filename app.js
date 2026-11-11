@@ -860,13 +860,26 @@ function bindExportButtons() {
     });
   }
 
-  document.getElementById("btnDownloadPNG").addEventListener("click", () => {
-    downloadPNG();
-  });
+  const btnDownloadPNG = document.getElementById("btnDownloadPNG");
+  if (btnDownloadPNG) {
+    btnDownloadPNG.addEventListener("click", () => {
+      downloadPNG();
+    });
+  }
 
-  document.getElementById("btnDownloadPDF").addEventListener("click", () => {
-    downloadPDF();
-  });
+  const btnDownloadJPG = document.getElementById("btnDownloadJPG");
+  if (btnDownloadJPG) {
+    btnDownloadJPG.addEventListener("click", () => {
+      downloadJPG();
+    });
+  }
+
+  const btnDownloadPDF = document.getElementById("btnDownloadPDF");
+  if (btnDownloadPDF) {
+    btnDownloadPDF.addEventListener("click", () => {
+      downloadPDF();
+    });
+  }
 
   const cardContainer = document.getElementById("cardCanvasContainer");
   document.getElementById("btnZoomFit").addEventListener("click", () => {
@@ -885,12 +898,26 @@ function printIDCard() {
 
 function downloadPNG() {
   renderCard();
-  const filename = `ID_CARD_${state.regNo || "STUDENT"}_${state.name.replace(/\s+/g, "_") || "CARD"}.png`;
+  const reg = (state.regNo && state.regNo.trim()) ? state.regNo.trim() : "STUDENT";
+  const name = (state.name && state.name.trim()) ? state.name.trim().replace(/\s+/g, "_") : "CARD";
+  const filename = `ID_CARD_${reg}_${name}.png`;
   const link = document.createElement("a");
   link.download = filename;
   link.href = canvas.toDataURL("image/png", 1.0);
   link.click();
   showNotification("High-resolution PNG downloaded!");
+}
+
+function downloadJPG() {
+  renderCard();
+  const reg = (state.regNo && state.regNo.trim()) ? state.regNo.trim() : "STUDENT";
+  const name = (state.name && state.name.trim()) ? state.name.trim().replace(/\s+/g, "_") : "CARD";
+  const filename = `ID_CARD_${reg}_${name}.jpg`;
+  const link = document.createElement("a");
+  link.download = filename;
+  link.href = canvas.toDataURL("image/jpeg", 0.98);
+  link.click();
+  showNotification("High-resolution JPG downloaded!");
 }
 
 function downloadPDF() {
