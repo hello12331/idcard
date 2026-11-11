@@ -156,19 +156,20 @@ function loadAssets() {
 function initDynamicAdminFeatures() {
   if (!activeConfig) return;
 
-  // 1. Branding: Header, College Name, Subtitle, Badge
+  // 1. Branding: Header Portal Title and Badge
   if (activeConfig.branding) {
-    const headerCollege = document.getElementById("headerCollegeName");
-    if (headerCollege && activeConfig.branding.collegeName) {
-      headerCollege.textContent = activeConfig.branding.collegeName;
+    const headerTitle = document.getElementById("headerCollegeName");
+    if (headerTitle) {
+      headerTitle.textContent = activeConfig.branding.portalTitle || "Student ID Card Portal";
     }
     const headerSub = document.getElementById("headerSubtitle");
-    if (headerSub && activeConfig.branding.subtitle) {
-      headerSub.textContent = activeConfig.branding.subtitle;
+    if (headerSub) {
+      headerSub.textContent = "";
+      headerSub.classList.add("hidden");
     }
     const headerBadge = document.getElementById("headerBadge");
-    if (headerBadge && activeConfig.branding.portalBadge) {
-      headerBadge.textContent = activeConfig.branding.portalBadge;
+    if (headerBadge && activeConfig.branding.badgeText) {
+      headerBadge.textContent = activeConfig.branding.badgeText;
     }
 
     // Toggle features visibility if configured
@@ -322,35 +323,46 @@ function bindInputEvents() {
     });
   }
 
-  document.getElementById("btnFillSample").addEventListener("click", () => {
-    fillSampleData();
-  });
+  const btnFillSample = document.getElementById("btnFillSample");
+  if (btnFillSample) {
+    btnFillSample.addEventListener("click", () => {
+      fillSampleData();
+    });
+  }
 
-  document.getElementById("btnClearAll").addEventListener("click", () => {
-    clearAllData();
-  });
+  const btnClearAll = document.getElementById("btnClearAll");
+  if (btnClearAll) {
+    btnClearAll.addEventListener("click", () => {
+      clearAllData();
+    });
+  }
 
-  document.getElementById("templateUpload").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const newImg = new Image();
-        newImg.onload = () => {
-          state.templateImg = newImg;
-          renderCard();
-          showNotification("Custom template loaded!");
+  const templateUpload = document.getElementById("templateUpload");
+  if (templateUpload) {
+    templateUpload.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const newImg = new Image();
+          newImg.onload = () => {
+            state.templateImg = newImg;
+            renderCard();
+            showNotification("Custom template loaded!");
+          };
+          newImg.src = event.target.result;
         };
-        newImg.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  });
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 }
 
 // Bind photo upload, zoom, pan
 function bindPhotoControls() {
   const photoInput = document.getElementById("photoUpload");
+  if (!photoInput) return;
+
   const zoomSlider = document.getElementById("photoZoom");
   const panXSlider = document.getElementById("photoPanX");
   const panYSlider = document.getElementById("photoPanY");
@@ -377,84 +389,104 @@ function bindPhotoControls() {
   });
 
   const dropZone = document.getElementById("photoDropZone");
-  dropZone.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    dropZone.classList.add("border-blue-500", "bg-blue-50");
-  });
-  dropZone.addEventListener("dragleave", (e) => {
-    e.preventDefault();
-    dropZone.classList.remove("border-blue-500", "bg-blue-50");
-  });
-  dropZone.addEventListener("drop", (e) => {
-    e.preventDefault();
-    dropZone.classList.remove("border-blue-500", "bg-blue-50");
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          state.photoImg = img;
-          resetPhotoAdjustments();
-          renderCard();
-          showNotification("Photo uploaded!");
+  if (dropZone) {
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("border-blue-500", "bg-blue-50");
+    });
+    dropZone.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("border-blue-500", "bg-blue-50");
+    });
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("border-blue-500", "bg-blue-50");
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            state.photoImg = img;
+            resetPhotoAdjustments();
+            renderCard();
+            showNotification("Photo uploaded!");
+          };
+          img.src = event.target.result;
         };
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  });
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 
-  zoomSlider.addEventListener("input", (e) => {
-    state.photoScale = parseFloat(e.target.value);
-    document.getElementById("zoomValue").textContent = `${Math.round(state.photoScale * 100)}%`;
-    renderCard();
-  });
+  if (zoomSlider) {
+    zoomSlider.addEventListener("input", (e) => {
+      state.photoScale = parseFloat(e.target.value);
+      const zv = document.getElementById("zoomValue");
+      if (zv) zv.textContent = `${Math.round(state.photoScale * 100)}%`;
+      renderCard();
+    });
+  }
 
-  panXSlider.addEventListener("input", (e) => {
-    state.photoPanX = parseInt(e.target.value, 10);
-    renderCard();
-  });
-  panYSlider.addEventListener("input", (e) => {
-    state.photoPanY = parseInt(e.target.value, 10);
-    renderCard();
-  });
+  if (panXSlider) {
+    panXSlider.addEventListener("input", (e) => {
+      state.photoPanX = parseInt(e.target.value, 10);
+      renderCard();
+    });
+  }
 
-  btnResetPhoto.addEventListener("click", () => {
-    resetPhotoAdjustments();
-    renderCard();
-  });
+  if (panYSlider) {
+    panYSlider.addEventListener("input", (e) => {
+      state.photoPanY = parseInt(e.target.value, 10);
+      renderCard();
+    });
+  }
 
-  btnLoadSamplePhoto.addEventListener("click", () => {
-    state.photoImg = new Image();
-    state.photoImg.onload = () => {
+  if (btnResetPhoto) {
+    btnResetPhoto.addEventListener("click", () => {
       resetPhotoAdjustments();
       renderCard();
-      showNotification("Reference student photo loaded!");
-    };
-    if (typeof EMBEDDED_ASSETS !== "undefined" && EMBEDDED_ASSETS.samplePhotoBase64) {
-      state.photoImg.src = EMBEDDED_ASSETS.samplePhotoBase64;
-    } else {
-      state.photoImg.src = "assets/sample_photo.jpg";
-    }
-  });
+    });
+  }
 
-  btnRemovePhoto.addEventListener("click", () => {
-    state.photoImg = null;
-    photoInput.value = "";
-    renderCard();
-    showNotification("Photo removed.");
-  });
+  if (btnLoadSamplePhoto) {
+    btnLoadSamplePhoto.addEventListener("click", () => {
+      state.photoImg = new Image();
+      state.photoImg.onload = () => {
+        resetPhotoAdjustments();
+        renderCard();
+        showNotification("Reference student photo loaded!");
+      };
+      if (typeof EMBEDDED_ASSETS !== "undefined" && EMBEDDED_ASSETS.samplePhotoBase64) {
+        state.photoImg.src = EMBEDDED_ASSETS.samplePhotoBase64;
+      } else {
+        state.photoImg.src = "assets/sample_photo.jpg";
+      }
+    });
+  }
+
+  if (btnRemovePhoto) {
+    btnRemovePhoto.addEventListener("click", () => {
+      state.photoImg = null;
+      photoInput.value = "";
+      renderCard();
+      showNotification("Photo removed.");
+    });
+  }
 }
 
 function resetPhotoAdjustments() {
   state.photoScale = 1.0;
   state.photoPanX = 0;
   state.photoPanY = 0;
-  document.getElementById("photoZoom").value = 1.0;
-  document.getElementById("zoomValue").textContent = "100%";
-  document.getElementById("photoPanX").value = 0;
-  document.getElementById("photoPanY").value = 0;
+  const pz = document.getElementById("photoZoom");
+  if (pz) pz.value = 1.0;
+  const zv = document.getElementById("zoomValue");
+  if (zv) zv.textContent = "100%";
+  const px = document.getElementById("photoPanX");
+  if (px) px.value = 0;
+  const py = document.getElementById("photoPanY");
+  if (py) py.value = 0;
 }
 
 // Mouse dragging directly inside photo frame
