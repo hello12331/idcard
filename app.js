@@ -3,6 +3,9 @@
  * Master Render Engine (Exact Pixel Match with Official Reference)
  */
 
+// Active Config from Admin Studio (or default)
+let activeConfig = (typeof ConfigManager !== "undefined") ? ConfigManager.load() : (typeof DEFAULT_CONFIG !== "undefined" ? DEFAULT_CONFIG : null);
+
 // Application State
 const state = {
   name: "KODELA KIRAN KUMAR",
@@ -12,6 +15,7 @@ const state = {
   bloodGroup: "O+ve",
   batch: "2023 - 2027",
   showUnderlines: false, // Clean look matching target reference
+  customFieldsData: {}, // Additional custom dynamic fields
   
   // Photo state
   photoImg: null,
@@ -40,21 +44,48 @@ let canvas, ctx;
 let barcodeOffscreenCanvas;
 
 // Photo frame dimensions matching official target reference (137, 305, 354, 396)
-const PHOTO_FRAME = {
-  x: 137,
-  y: 305,
-  width: 354,
-  height: 396
+const PHOTO_FRAME = (activeConfig && activeConfig.template && activeConfig.template.photoFrame)
+  ? { ...activeConfig.template.photoFrame }
+  : { x: 137, y: 305, width: 354, height: 396 };
+
+// Helper to get coordinates and canvas styling dynamically from active config
+function getCoords(id, fallback) {
+  if (activeConfig && activeConfig.fields) {
+    const f = activeConfig.fields.find(item => item.id === id);
+    if (f && f.canvas) {
+      return {
+        x: f.canvas.x,
+        y: f.canvas.y,
+        font: `${f.canvas.fontWeight || "bold"} ${f.canvas.fontSize || 30}px ${f.canvas.fontFamily || "'Montserrat', Arial, sans-serif"}`,
+        maxW: f.canvas.maxWidth || fallback.maxW || 550,
+        color: f.canvas.color || "#000000",
+        textAlign: f.canvas.textAlign || fallback.textAlign || "left",
+        textBaseline: f.canvas.textBaseline || fallback.textBaseline || "alphabetic",
+        rotation: f.canvas.rotation !== undefined ? f.canvas.rotation : (fallback.rotation || 0),
+        prefix: f.canvas.prefix || ""
+      };
+    }
+  }
+  return fallback;
+}
+
+const DEFAULT_COORDS = {
+  branch: { x: 323, y: 288, font: "bold 30px 'Montserrat', Arial, sans-serif", maxW: 200, textAlign: "left", textBaseline: "alphabetic" },
+  name: { x: 92, y: 753, font: "bold 32px 'Montserrat', Arial, sans-serif", maxW: 550, textAlign: "left", textBaseline: "alphabetic" },
+  mobile: { x: 261, y: 802, font: "bold 29px 'Montserrat', Arial, sans-serif", maxW: 260, textAlign: "left", textBaseline: "alphabetic" },
+  regNo: { x: 227, y: 851, font: "bold 29px 'Montserrat', Arial, sans-serif", maxW: 320, textAlign: "left", textBaseline: "alphabetic" },
+  bloodGroup: { x: 565, y: 212, font: "bold 36px 'Montserrat', Arial, sans-serif", textAlign: "center", textBaseline: "middle" },
+  batch: { x: 98, y: 481, font: "bold 34px 'Montserrat', Arial, sans-serif", textAlign: "center", textBaseline: "middle", rotation: -90 }
 };
 
-// Exact coordinates calibrated to match official target reference
+// Exact coordinates calibrated with fallback support
 const COORDS = {
-  branch: { x: 323, y: 288, font: "bold 30px 'Montserrat', Arial, sans-serif" },
-  name: { x: 92, y: 753, maxW: 550, font: "bold 32px 'Montserrat', Arial, sans-serif" },
-  mobile: { x: 261, y: 802, font: "bold 29px 'Montserrat', Arial, sans-serif" },
-  regNo: { x: 227, y: 851, font: "bold 29px 'Montserrat', Arial, sans-serif" },
-  bloodGroup: { x: 565, y: 212, font: "bold 36px 'Montserrat', Arial, sans-serif" },
-  batch: { x: 98, y: 481, font: "bold 34px 'Montserrat', Arial, sans-serif" }
+  get branch() { return getCoords("branch", DEFAULT_COORDS.branch); },
+  get name() { return getCoords("name", DEFAULT_COORDS.name); },
+  get mobile() { return getCoords("mobile", DEFAULT_COORDS.mobile); },
+  get regNo() { return getCoords("regNo", DEFAULT_COORDS.regNo); },
+  get bloodGroup() { return getCoords("bloodGroup", DEFAULT_COORDS.bloodGroup); },
+  get batch() { return getCoords("batch", DEFAULT_COORDS.batch); }
 };
 
 // Initialize Application
@@ -69,6 +100,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Load Assets
   loadAssets();
+
+  // Initialize Dynamic Admin Studio Settings & Custom Fields
+  initDynamicAdminFeatures();
 
   // Initial immediate render
   renderCard();
@@ -99,7 +133,9 @@ function loadAssets() {
   state.templateImg.onerror = () => {
     state.templateImg.src = "assets/perfect_base_template.png";
   };
-  if (typeof EMBEDDED_ASSETS !== "undefined" && EMBEDDED_ASSETS.templateBase64) {
+  if (activeConfig && activeConfig.template && activeConfig.template.customTemplateBase64) {
+    state.templateImg.src = activeConfig.template.customTemplateBase64;
+  } else if (typeof EMBEDDED_ASSETS !== "undefined" && EMBEDDED_ASSETS.templateBase64) {
     state.templateImg.src = EMBEDDED_ASSETS.templateBase64;
   } else {
     state.templateImg.src = "assets/perfect_base_template.png";
@@ -114,6 +150,87 @@ function loadAssets() {
     state.photoImg.src = EMBEDDED_ASSETS.samplePhotoBase64;
   } else {
     state.photoImg.src = "assets/sample_photo.jpg";
+  }
+}
+
+function initDynamicAdminFeatures() {
+  if (!activeConfig) return;
+
+  // 1. Branding: Header, College Name, Subtitle, Badge
+  if (activeConfig.branding) {
+    const headerCollege = document.getElementById("headerCollegeName");
+    if (headerCollege && activeConfig.branding.collegeName) {
+      headerCollege.textContent = activeConfig.branding.collegeName;
+    }
+    const headerSub = document.getElementById("headerSubtitle");
+    if (headerSub && activeConfig.branding.subtitle) {
+      headerSub.textContent = activeConfig.branding.subtitle;
+    }
+    const headerBadge = document.getElementById("headerBadge");
+    if (headerBadge && activeConfig.branding.portalBadge) {
+      headerBadge.textContent = activeConfig.branding.portalBadge;
+    }
+
+    // Toggle features visibility if configured
+    if (activeConfig.branding.features) {
+      const feat = activeConfig.branding.features;
+      const batchCard = document.getElementById("batchCard");
+      if (batchCard && feat.batchMode === false) {
+        batchCard.classList.add("hidden");
+      }
+      const btnFillSample = document.getElementById("btnFillSample");
+      if (btnFillSample && feat.sampleData === false) {
+        btnFillSample.classList.add("hidden");
+      }
+      const templateUploadContainer = document.getElementById("templateUpload")?.closest(".p-3");
+      if (templateUploadContainer && feat.templateUpload === false) {
+        templateUploadContainer.classList.add("hidden");
+      }
+    }
+  }
+
+  // 2. Custom Dynamic Fields in Form
+  const customFieldsCard = document.getElementById("customFieldsCard");
+  const customFieldsInputsList = document.getElementById("customFieldsInputsList");
+
+  if (customFieldsCard && customFieldsInputsList && Array.isArray(activeConfig.fields)) {
+    const customFields = activeConfig.fields.filter(f => f.category === 'custom' && f.visible !== false);
+    if (customFields.length > 0) {
+      customFieldsCard.classList.remove("hidden");
+      customFieldsInputsList.innerHTML = "";
+
+      customFields.forEach(f => {
+        if (state.customFieldsData[f.id] === undefined) {
+          state.customFieldsData[f.id] = f.defaultValue || "";
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "flex flex-col gap-1";
+
+        const label = document.createElement("label");
+        label.className = "text-xs font-semibold text-slate-700 flex items-center justify-between";
+        label.innerHTML = `<span>${f.label}</span> <span class="text-[10px] text-slate-400 font-mono">#${f.id}</span>`;
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = `custom_${f.id}`;
+        input.value = state.customFieldsData[f.id];
+        input.placeholder = f.placeholder || f.label;
+        input.className = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 bg-white shadow-sm";
+
+        input.addEventListener("input", (e) => {
+          state.customFieldsData[f.id] = e.target.value.toUpperCase();
+          e.target.value = state.customFieldsData[f.id];
+          renderCard();
+        });
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(input);
+        customFieldsInputsList.appendChild(wrapper);
+      });
+    } else {
+      customFieldsCard.classList.add("hidden");
+    }
   }
 }
 
@@ -482,16 +599,22 @@ function renderCard() {
     ctx.drawImage(state.templateImg, 0, 0, canvas.width, canvas.height);
   }
 
-  // 2b. Ensure continuous unbroken accreditation dashed divider line across width
-  ctx.save();
-  ctx.strokeStyle = "#063c9e";
-  ctx.lineWidth = 2.5;
-  ctx.setLineDash([12, 5]);
-  ctx.beginPath();
-  ctx.moveTo(514, 170.5);
-  ctx.lineTo(705, 170.5);
-  ctx.stroke();
-  ctx.restore();
+  // 2b. Dashed accreditation line
+  const dashedCfg = (activeConfig && activeConfig.template && activeConfig.template.dashedLine)
+    ? activeConfig.template.dashedLine
+    : { enabled: true, y: 170.5, startX: 514, endX: 705, color: "#063c9e", width: 2.5, dash: [12, 5] };
+
+  if (dashedCfg.enabled !== false) {
+    ctx.save();
+    ctx.strokeStyle = dashedCfg.color || "#063c9e";
+    ctx.lineWidth = dashedCfg.width || 2.5;
+    ctx.setLineDash(dashedCfg.dash || [12, 5]);
+    ctx.beginPath();
+    ctx.moveTo(dashedCfg.startX !== undefined ? dashedCfg.startX : 514, dashedCfg.y || 170.5);
+    ctx.lineTo(dashedCfg.endX !== undefined ? dashedCfg.endX : 705, dashedCfg.y || 170.5);
+    ctx.stroke();
+    ctx.restore();
+  }
 
   // 3. Optional Underlines (Only if explicitly checked)
   if (state.showUnderlines) {
@@ -646,6 +769,46 @@ function renderCard() {
     ctx.fillText(state.regNo, COORDS.regNo.x, COORDS.regNo.y);
     ctx.restore();
   }
+
+  // 12. Dynamic Admin-Defined Custom Fields
+  if (activeConfig && Array.isArray(activeConfig.fields)) {
+    const customFields = activeConfig.fields.filter(f => f.category === 'custom' && f.visible !== false);
+    for (const field of customFields) {
+      const val = state.customFieldsData[field.id] !== undefined ? state.customFieldsData[field.id] : (field.defaultValue || "");
+      if (val && val.trim() !== "") {
+        const textToDraw = (field.canvas.prefix || "") + val;
+        ctx.save();
+        const fSize = field.canvas.fontSize || 28;
+        const fWeight = field.canvas.fontWeight || "bold";
+        const fFamily = field.canvas.fontFamily || "'Montserrat', Arial, sans-serif";
+        ctx.font = `${fWeight} ${fSize}px ${fFamily}`;
+        ctx.fillStyle = field.canvas.color || "#000000";
+        ctx.textAlign = field.canvas.textAlign || "left";
+        ctx.textBaseline = field.canvas.textBaseline || "alphabetic";
+
+        let posX = field.canvas.x;
+        let posY = field.canvas.y;
+
+        if (field.canvas.rotation) {
+          ctx.translate(posX, posY);
+          ctx.rotate((field.canvas.rotation * Math.PI) / 180);
+          posX = 0;
+          posY = 0;
+        }
+
+        if (field.canvas.maxWidth) {
+          let curSize = fSize;
+          while (ctx.measureText(textToDraw).width > field.canvas.maxWidth && curSize > 12) {
+            curSize -= 1;
+            ctx.font = `${fWeight} ${curSize}px ${fFamily}`;
+          }
+        }
+
+        ctx.fillText(textToDraw, posX, posY);
+        ctx.restore();
+      }
+    }
+  }
 }
 
 // Bind Export Buttons: Print, PNG, PDF
@@ -756,6 +919,15 @@ function fillSampleData() {
     state.photoImg.src = "assets/sample_photo.jpg";
   }
 
+  // Set default values for custom dynamic fields
+  if (activeConfig && Array.isArray(activeConfig.fields)) {
+    activeConfig.fields.filter(f => f.category === 'custom').forEach(f => {
+      state.customFieldsData[f.id] = f.defaultValue || "";
+      const inp = document.getElementById(`custom_${f.id}`);
+      if (inp) inp.value = state.customFieldsData[f.id];
+    });
+  }
+
   showNotification("Official reference student details loaded!");
 }
 
@@ -768,6 +940,15 @@ function clearAllData() {
   state.batch = "";
   state.photoImg = null;
   state.showUnderlines = false;
+
+  // Clear custom dynamic fields
+  if (state.customFieldsData) {
+    Object.keys(state.customFieldsData).forEach(k => {
+      state.customFieldsData[k] = "";
+      const inp = document.getElementById(`custom_${k}`);
+      if (inp) inp.value = "";
+    });
+  }
 
   document.getElementById("studentName").value = "";
   document.getElementById("regNo").value = "";

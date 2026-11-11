@@ -37,6 +37,8 @@
 
   <!-- Embedded Assets (Zero-CORS offline & file:// support) -->
   <script src="assets_data.js?v=1.0.6"></script>
+  <!-- Global Configuration Engine -->
+  <script src="config.js?v=1.0.0"></script>
 
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="styles.css?v=1.0.6">
@@ -47,17 +49,22 @@
   <header class="no-print bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-950 text-white shadow-lg sticky top-0 z-40 border-b border-blue-800">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3.5 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center space-x-2.5 sm:space-x-3">
-        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white text-blue-900 flex items-center justify-center font-black text-lg sm:text-xl shadow-md shrink-0">
+        <div id="headerBadge" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white text-blue-900 flex items-center justify-center font-black text-lg sm:text-xl shadow-md shrink-0">
           CIT
         </div>
         <div>
-          <h1 class="font-bold text-xs sm:text-base md:text-lg leading-tight tracking-wide">CHALAPATHI INSTITUTE OF TECHNOLOGY</h1>
-          <p class="text-[10px] sm:text-xs text-blue-200">Autonomous • NBA & NAAC 'A' Grade • Student ID Card Portal</p>
+          <h1 id="headerCollegeName" class="font-bold text-xs sm:text-base md:text-lg leading-tight tracking-wide">CHALAPATHI INSTITUTE OF TECHNOLOGY</h1>
+          <p id="headerSubtitle" class="text-[10px] sm:text-xs text-blue-200">Autonomous • NBA & NAAC 'A' Grade • Student ID Card Portal</p>
         </div>
       </div>
 
       <!-- Quick Action Buttons -->
       <div class="flex items-center space-x-1.5 sm:space-x-2.5 text-xs sm:text-sm">
+        <a href="admin.html" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 transition flex items-center gap-1.5 border border-slate-600/60 shadow-sm active:scale-95 text-xs sm:text-sm font-semibold">
+          <i class="fa-solid fa-sliders text-amber-400"></i>
+          <span class="hidden sm:inline">Admin Studio</span>
+          <span class="sm:hidden">Admin</span>
+        </a>
         <button id="btnFillSample" type="button" title="Fill official sample card details" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-blue-800/80 hover:bg-blue-700 text-blue-100 transition flex items-center gap-1.5 border border-blue-600/50 shadow-sm active:scale-95">
           <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
           <span class="hidden sm:inline">Sample Data</span>
@@ -270,6 +277,20 @@
               <p class="text-[11px] text-slate-400 mt-1">Rendered vertically along the left edge of the ID card.</p>
             </div>
           </div>
+        </div>
+
+        <!-- CARD 1b: CUSTOM / DYNAMIC ADMIN FIELDS (Rendered dynamically if custom fields are created by Admin) -->
+        <div id="customFieldsCard" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6 space-y-4">
+          <div class="flex items-center space-x-2.5 pb-3 border-b border-slate-100">
+            <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center">
+              <i class="fa-solid fa-shapes"></i>
+            </span>
+            <div>
+              <h2 class="font-bold text-slate-800 text-base">Custom Card Fields</h2>
+              <p class="text-xs text-slate-400">Additional dynamic fields configured in Admin Studio</p>
+            </div>
+          </div>
+          <div id="customFieldsInputsList" class="space-y-4"></div>
         </div>
 
         <!-- CARD 2: STUDENT PHOTO UPLOAD & POSITIONING -->
