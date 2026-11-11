@@ -14,7 +14,6 @@ let initialFieldX = 0, initialFieldY = 0;
 let canvas, ctx;
 let barcodeOffscreenCanvas;
 let templateImg = null;
-let samplePhotoImg = null;
 
 // Field bounding boxes map for click & drag detection
 let fieldBoundingBoxes = {};
@@ -69,18 +68,6 @@ function loadAdminAssets() {
   } else {
     templateImg.src = "assets/perfect_base_template.png";
   }
-
-  samplePhotoImg = new Image();
-  samplePhotoImg.onload = () => renderAdminCanvas();
-  samplePhotoImg.onerror = () => {
-    samplePhotoImg.src = "assets/sample_photo.jpg";
-  };
-
-  if (typeof EMBEDDED_ASSETS !== "undefined" && EMBEDDED_ASSETS.samplePhotoBase64) {
-    samplePhotoImg.src = EMBEDDED_ASSETS.samplePhotoBase64;
-  } else {
-    samplePhotoImg.src = "assets/sample_photo.jpg";
-  }
 }
 
 /**
@@ -115,42 +102,38 @@ function renderAdminCanvas() {
     ctx.restore();
   }
 
-  // 4. Sample Passport Photo Frame Layer
+  // 4. Student Photo Frame Area (Clean white placeholder - no person photo)
   const pf = config.template.photoFrame;
-  if (samplePhotoImg && samplePhotoImg.complete && pf) {
+  if (pf) {
     ctx.save();
-    ctx.beginPath();
-    ctx.rect(pf.x, pf.y, pf.width, pf.height);
-    ctx.clip();
-
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(pf.x, pf.y, pf.width, pf.height);
 
-    const imgAspect = samplePhotoImg.width / samplePhotoImg.height;
-    const frameAspect = pf.width / pf.height;
+    // If overlays enabled, draw a sleek dashed calibration guide
+    if (overlaysVisible) {
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([8, 6]);
+      ctx.strokeRect(pf.x, pf.y, pf.width, pf.height);
 
-    let baseW, baseH;
-    if (imgAspect > frameAspect) {
-      baseH = pf.height;
-      baseW = pf.height * imgAspect;
-    } else {
-      baseW = pf.width;
-      baseH = pf.width / imgAspect;
+      ctx.fillStyle = "#64748b";
+      ctx.font = "bold 18px 'Inter', sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("PHOTO FRAME", pf.x + pf.width / 2, pf.y + pf.height / 2 - 12);
+      ctx.font = "14px 'JetBrains Mono', monospace";
+      ctx.fillStyle = "#94a3b8";
+      ctx.fillText(`${pf.width} × ${pf.height} px`, pf.x + pf.width / 2, pf.y + pf.height / 2 + 14);
     }
-
-    const posX = pf.x + (pf.width - baseW) / 2;
-    const posY = pf.y + (pf.height - baseH) / 2;
-    ctx.drawImage(samplePhotoImg, posX, posY, baseW, baseH);
-    ctx.restore();
 
     // Photo frame border if configured
     if (pf.borderWidth > 0) {
-      ctx.save();
       ctx.strokeStyle = pf.borderColor || "#0b4594";
       ctx.lineWidth = pf.borderWidth;
+      ctx.setLineDash([]);
       ctx.strokeRect(pf.x, pf.y, pf.width, pf.height);
-      ctx.restore();
     }
+    ctx.restore();
   }
 
   // 5. Dynamic Barcode Layer

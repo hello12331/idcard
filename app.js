@@ -443,17 +443,10 @@ function bindPhotoControls() {
 
   if (btnLoadSamplePhoto) {
     btnLoadSamplePhoto.addEventListener("click", () => {
-      state.photoImg = new Image();
-      state.photoImg.onload = () => {
-        resetPhotoAdjustments();
-        renderCard();
-        showNotification("Reference student photo loaded!");
-      };
-      if (typeof EMBEDDED_ASSETS !== "undefined" && EMBEDDED_ASSETS.samplePhotoBase64) {
-        state.photoImg.src = EMBEDDED_ASSETS.samplePhotoBase64;
-      } else {
-        state.photoImg.src = "assets/sample_photo.jpg";
-      }
+      state.photoImg = null;
+      resetPhotoAdjustments();
+      renderCard();
+      showNotification("Photo reset.");
     });
   }
 
@@ -971,16 +964,9 @@ function fillSampleData() {
   const underlineToggle = document.getElementById("underlineToggle");
   if (underlineToggle) underlineToggle.checked = false;
 
-  state.photoImg = new Image();
-  state.photoImg.onload = () => {
-    resetPhotoAdjustments();
-    renderCard();
-  };
-  if (typeof EMBEDDED_ASSETS !== "undefined" && EMBEDDED_ASSETS.samplePhotoBase64) {
-    state.photoImg.src = EMBEDDED_ASSETS.samplePhotoBase64;
-  } else {
-    state.photoImg.src = "assets/sample_photo.jpg";
-  }
+  state.photoImg = null;
+  resetPhotoAdjustments();
+  renderCard();
 
   // Set default values for custom dynamic fields
   if (activeConfig && Array.isArray(activeConfig.fields)) {
