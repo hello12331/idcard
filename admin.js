@@ -313,13 +313,13 @@ function generateBarcode(text) {
  */
 function initTabs() {
   const tabs = [
-    { btn: "tabBtnFields", pane: "paneFields" },
-    { btn: "tabBtnTemplate", pane: "paneTemplate" },
-    { btn: "tabBtnLanding", pane: "paneLanding" },
-    { btn: "tabBtnJSON", pane: "paneJSON" }
+    { btn: "tabBtnFields", pane: "paneFields", title: "Card Fields Editor" },
+    { btn: "tabBtnTemplate", pane: "paneTemplate", title: "Template Manager" },
+    { btn: "tabBtnLanding", pane: "paneLanding", title: "Landing & Branding" },
+    { btn: "tabBtnJSON", pane: "paneJSON", title: "Config JSON Backup" }
   ];
 
-  tabs.forEach(({ btn, pane }) => {
+  tabs.forEach(({ btn, pane, title }) => {
     const btnEl = document.getElementById(btn);
     if (!btnEl) return;
     btnEl.addEventListener("click", () => {
@@ -327,18 +327,25 @@ function initTabs() {
         const b = document.getElementById(t.btn);
         const p = document.getElementById(t.pane);
         if (t.btn === btn) {
-          b.classList.add("bg-blue-600", "text-white", "shadow-sm");
-          b.classList.remove("text-slate-400");
+          b.className = "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition group bg-blue-600 text-white shadow-xs";
           p.classList.remove("hidden");
         } else {
-          b.classList.remove("bg-blue-600", "text-white", "shadow-sm");
-          b.classList.add("text-slate-400");
+          b.className = "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition group";
           p.classList.add("hidden");
         }
       });
 
+      const breadcrumb = document.getElementById("activeBreadcrumb");
+      if (breadcrumb) {
+        breadcrumb.textContent = title;
+      }
+
       if (pane === "paneJSON") {
         updateRawJSONTextarea();
+      }
+
+      if (window.lucide) {
+        window.lucide.createIcons();
       }
     });
   });
@@ -358,8 +365,8 @@ function renderFieldsPills() {
     pill.id = `pill_${field.id}`;
     pill.className = `px-3 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 ${
       field.id === activeFieldId
-        ? "border-blue-500 bg-blue-500/20 text-blue-300"
-        : "border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600 hover:text-white"
+        ? "border-blue-600 bg-blue-50 text-blue-700 font-bold shadow-xs ring-1 ring-blue-600"
+        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs"
     }`;
 
     let iconClass = "fa-solid fa-font";
@@ -394,9 +401,9 @@ function selectField(fieldId) {
   // Update pills active styling
   document.querySelectorAll("#fieldsPillsContainer button").forEach(btn => {
     if (btn.id === `pill_${fieldId}`) {
-      btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 border-blue-500 bg-blue-500/20 text-blue-300";
+      btn.className = "px-3 py-1.5 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 border-blue-600 bg-blue-50 text-blue-700 shadow-xs ring-1 ring-blue-600";
     } else {
-      btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600 hover:text-white";
+      btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs";
     }
   });
 
